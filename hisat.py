@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import subprocess
 import sys
 import os
@@ -10,6 +11,7 @@ def run(acc_list, index_base, gtf_file, paired, prefix):
     os.mkdir(output_dir)
     output_dir2 = prefix + "_Count_Tables"
     os.mkdir(output_dir2)
+    threads = "8"
 
     # Iterate through all samples to produce separate SAM files for all of them
     for line in lines:
@@ -20,32 +22,32 @@ def run(acc_list, index_base, gtf_file, paired, prefix):
         idx = "-x " + str(index_base)
         acc = "--sra-acc " + str(line)
         out = "-S " + filename
-        align_summary = "--summary-file " + prefix + "_summary.txt" 
+        summary = "--summary-file " + prefix + "_summary.txt"
         metrics = "--met-file " + prefix + "_metrics.txt"
-        # supress SAM records for reads that don't align, 
-        cmd = ["hisat2 -p", idx, acc, out, "--no-unal", summary, metrics]
-        subprocess.run(cmd)
+        # supress SAM records for reads that don't align,
+        cmd = ("hisat2 -p " + threads + " " + idx + " " + acc + " " + out + " --no-unal " + summary + " " + metrics)
+        subprocess.run(cmd.split(" "))
 
-        # 
+        #
         new_filename = line + "_counts.txt"
         redirect = f"> {new_filename}"
         nonunique = "--nonunique all"
-        cmd = ["htseq-count", filename, gtf_file, redirect, "-n 8"]
+        cmd = "htseq-count " + filename + " " + gtf_file + " " + redirect + " -n " + threads
         if (paired == "p"):
-            subprocess.run(["samtools sort -n -o", filename, "-O sam -@ 8"])
-            cmd += ["-r name"]
-        subprocess.run(cmd)
+            subprocess.run(("samtools sort -n -o " + filename + " -O sam -@ " + threads).split(" "))
+            cmd += " -r name"
+        subprocess.run(cmd.split(" "))
 
 
         # Move files to new directories
         os.replace(filename, os.path.join(output_dir,filename))
         os.replace(new_filename, os.path.join(output_dir2,new_filename))
 
-    
+
 
 acc_list = sys.argv[1]
 index_base = sys.argv[2]
 gtf_file = sys.argv[3]
 paired = sys.argv[4]
 prefix = sys.argv[5]
-run(fastq_dir, index_base, gtf_file, paired, prefix)
+run(acc_list, index_base, gtf_file, paired, prefix)
