@@ -26,8 +26,7 @@ def run(fastq_files, index_base, gtf_file, paired, prefix):
     summary = "--summary-file " + prefix + "_summary.txt"
     metrics = "--met-file " + prefix + "_metrics.txt"
     # supress SAM records for reads that don't align,
-    cmd = ("hisat2 -p " + threads + " " + idx + " " + fastq + " " + out + " --no-unal " + summary + "
- " + metrics)
+    cmd = ("hisat2 -p " + threads + " " + idx + " " + fastq + " " + out + " --no-unal " + summary + " " + metrics)
     print("Running hisat2", file=sys.stderr)
     subprocess.run(cmd.split(" "))
     print("Ran hisat2, running htseq", file=sys.stderr)
@@ -37,15 +36,18 @@ def run(fastq_files, index_base, gtf_file, paired, prefix):
     new_file = open(new_filename, "w")
     nonunique = "--nonunique all"
     cmd = "htseq-count " + filename + " " + gtf_file + " -n " + threads
+    filename_sorted = filename.replace(".sam", "_sort.sam")
     if (paired == "p"):
-        subprocess.run(("samtools sort -n -o " + filename + " -O sam -@ " + threads).split(" "))
+        subprocess.run(("samtools sort -n -o " + filename_sorted + " -O sam -@ " + threads + " " + filename).split(" "))
+        os.remove(filename)
+        filename = filename_sorted
         cmd += " -r name"
     subprocess.run(cmd.split(" "), stdout=new_file)
     print("Ran htseq", file=sys.stderr)
     new_file.close()
 
     # Move files to new directories
-    #os.replace(filename, os.path.join(output_dir,filename))
+    #os.replace(filename_sorted, os.path.join(output_dir,filename_sorted))
     #os.replace(new_filename, os.path.join(output_dir2,new_filename))
 
 
