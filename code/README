@@ -1,0 +1,2 @@
+Slightly modified code from https://academic.oup.com/bioinformatics/article/32/12/i271/2288827 .
+This was translated to python 3 via 2to3, although it's unlikely that anything automatic like this will work properly. Convenience tools never work properly. Life is never easy.
