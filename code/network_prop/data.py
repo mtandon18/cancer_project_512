@@ -64,7 +64,7 @@ def read_prior(filename, network):
     return prior
 
 def differential_expression_dict(diffExpressionFile):
-    # Expects each line in file to have this formatting: "gene, logFoldChange\n" 
+    # Expects each line in file to have this formatting: "gene,logFoldChange\n" 
     diffExpDict = dict()  
     text = open(diffExpressionFile, 'r').read()
     for line in text:
