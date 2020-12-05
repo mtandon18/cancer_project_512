@@ -62,3 +62,12 @@ def read_prior(filename, network):
                 print('Warning: prior gene', name, 'does not appear in the background network, ignoring')
 
     return prior
+
+def differential_expression_dict(diffExpressionFile):
+    # Expects each line in file to have this formatting: "gene, logFoldChange\n" 
+    diffExpDict = dict()  
+    text = open(diffExpressionFile, 'r').read()
+    for line in text:
+        splitLine = [l.strip() for l in line.split(",")]
+        diffExpDict[splitLine[0]] = dissExpDict[float(splitLine[1])]
+    return diffExpDict

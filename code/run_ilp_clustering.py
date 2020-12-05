@@ -8,13 +8,11 @@ from clustering_ilp import find_clusters
 import find_prop_threshold as fpt
 
 
-def run_framework(priorFile, paramsFile, execDir, func=find_clusters.run, pvalue=None, expressionFile=None):
+def run_framework(priorFile, paramsFile, execDir, diffExpressionFile, func=find_clusters.run, pvalue=None, expressionFile=None):
     # Run propagation
     propFile = execDir + '/prop.txt' 
 
-    ''' Change above line of code here '''
-
-    propagation.run(priorFile, paramsFile, propFile, expressionFile)
+    diffExpDict = propagation.run(priorFile, paramsFile, propFile, diffExpressionFile, expressionFile)
 
     if pvalue != None:
         # Get the actual size of the prior (i.e. exclude genes not in the ppi network) and run propagations over random priors of the same size
@@ -36,7 +34,7 @@ def run_framework(priorFile, paramsFile, execDir, func=find_clusters.run, pvalue
 
     # Execute the ILP clustering
     os.mkdir(execDir + '/output')
-    func(execDir, thresholdedPropFile if pvalue != None else propFile, paramsFile)
+    func(execDir, thresholdedPropFile if pvalue != None else propFile, paramsFile, diffExpDict)
 
     # Create files that are required for convenient calculation of enrichments
     create_derived_files(execDir + '/output', priorFile)
@@ -69,8 +67,8 @@ def create_derived_files(outputDir, priorFile):
 
 if __name__ == '__main__':
     if len(sys.argv) < 4:
-        print('Usage: python run_ilp_clustering.py <priorFile> <paramsFile> <execDir>')
-        print('Example: python run_ilp_clustering.py $BNET_DIR/schizophrenia/schiz_genes_prior.txt $BNET_DIR/schizophrenia/params.ini $BNET_DIR/dis_comp/diseases/schiz')
+        print('Usage: python run_ilp_clustering.py <priorFile> <paramsFile> <execDir> <diffExpressionFile>')
+        #print('Example: python run_ilp_clustering.py $BNET_DIR/schizophrenia/schiz_genes_prior.txt $BNET_DIR/schizophrenia/params.ini $BNET_DIR/dis_comp/diseases/schiz')
         exit(1)
 
-    run_framework(sys.argv[1], sys.argv[2], sys.argv[3], pvalue=0.01)
+    run_framework(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], pvalue=0.01)

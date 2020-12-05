@@ -21,7 +21,7 @@ def read_params(paramsFile):
     return params
 
 
-def is_valid_args(priorFile, expressionFile, ppiFilename, alpha, iterations, epsilon):
+def is_valid_args(priorFile, expressionFile, diffExpressionFile, ppiFilename, alpha, iterations, epsilon):
     failed = False
     
     if not os.path.exists(priorFile):
@@ -34,6 +34,10 @@ def is_valid_args(priorFile, expressionFile, ppiFilename, alpha, iterations, eps
 
     if ppiFilename is None or not os.path.exists(ppiFilename):
         print("Network file does not exist")
+        failed = True
+
+    if ppiFilename is None or not os.path.exists(diffExpressionFile):
+        print("Differential expression file does not exist")
         failed = True
         
     if not 0 < alpha < 1:
@@ -69,6 +73,7 @@ def run_propagation(priorFile, expressionFile, outFile, ppiFilename, alpha, iter
     network = data.read_ppi(ppiFilename, expressionFile)
     prior = data.read_prior(priorFile, network)
     
+    
     if np.any(prior > 1.0):
         sys.stderr.write("Scaling prior, values outside [0,1]\n")
         prior /= np.max(prior)
@@ -81,14 +86,16 @@ def run_propagation(priorFile, expressionFile, outFile, ppiFilename, alpha, iter
             f.write("\t".join(map(str, item)) + '\n')
 
 
-def run(priorFile, paramsFile, outFile, expressionFile=None):
+def run(priorFile, paramsFile, outFile, diffExpressionFile, expressionFile=None):
     params = read_params(paramsFile)
     succeeded = is_valid_args(priorFile, None, **params)
     
     if succeeded:
-        run_propagation(priorFile, expressionFile, outFile, **params)
+        run_propagation(priorFile, expressionFile, diffExpressionFile, outFile, **params)
+        diffExpDict = data.differential_expression_dict(diffExpressionFile)
+        return diffExpDict
     
 
 if __name__ == '__main__':
-    run(sys.argv[1], sys.argv[2], sys.argv[3])
+    run(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
     

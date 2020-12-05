@@ -4,19 +4,31 @@ from networks_common import network_io
 
 BETA = 0.95
 
+def prob_modifier(logFChange, i, j):
+    M = abs((logFChange[i] + logFChange[j])/2.0)
+    N = abs(logFChange[i] - logFChange[j])
+    return 1 - 2.0/math.pi*math.atan(M/3.0) + math.asinh(N/3.0)/2.0
+
 '''
 We want to inject values for beta that reward interactions for similar expression
 '''
 
-def calc_weight(i, j, network, numEdges, edgeExists):
+def calc_weight(i, j, network, numEdges, edgeExists, diffExpDict):
     degI, degJ = network.degree(i), network.degree(j)
     prob = degI * degJ / (2 * float(numEdges))
+
+    ''' Injected code '''
+    prob *= prob_modifier(diffExpDict, i, j)
+    if prob <= (1-BETA):
+        prob = 1-BETA
+    ''' End of injected code'''
+
     if prob >= BETA:
         prob = BETA
     return math.log(BETA / prob) if edgeExists else math.log((1-BETA) / (1-prob))
     
 
-def reweight_by_prob_in_rand_graph(network, addNonEdges=True):
+def reweight_by_prob_in_rand_graph(network, diffExpDict, addNonEdges=True):
     ''' Return a new network where each edge is weighted according to its (approximated) probability in a random degree preserving graph.
         This weight will be stored as the "weight" attribute.
         If addNonEdges=True then non-edges are also weighted according to the same scheme, and the resulting network is complete.
@@ -26,12 +38,12 @@ def reweight_by_prob_in_rand_graph(network, addNonEdges=True):
     result = nx.Graph()
     
     for i,j in network.edges():
-        weight = calc_weight(i, j, network, numEdges, True)
+        weight = calc_weight(i, j, network, numEdges, True, diffExpDict)
         result.add_edge(i, j, weight=weight, edgeExists=1)
         
     if addNonEdges:
         for i,j in nx.complement(network).edges():
-            weight = calc_weight(i, j, network, numEdges, False)
+            weight = calc_weight(i, j, network, numEdges, False, diffExpDict)
             result.add_edge(i, j, weight=weight, edgeExists=0)
 
     return result

@@ -206,14 +206,14 @@ def get_ilp_cluster(nodeVars, nodeScores, logFile):
     return clusterNodes
 
 
-def perform_clustering(nodeScoresFile, outDir, logFile, minPropagationScore, maxPropagationNodes, ignoredNodesFilename, ppiFilename, numClusters, **extras):
+def perform_clustering(nodeScoresFile, outDir, logFile, diffExpDict, minPropagationScore, maxPropagationNodes, ignoredNodesFilename, ppiFilename, numClusters, **extras):
     startTime = time.time()
 
     nodeScores = prop_file_reader.read_node_scores(nodeScoresFile, minPropagationScore, maxPropagationNodes, ignoredNodesFilename)
     ppiNetwork = network_io.read_ppi(ppiFilename, removeSelfLoops=True)
 
     # Reweight edges by their probability in a random degree preserving graph
-    reweightedNetwork = network_utils.reweight_by_prob_in_rand_graph(ppiNetwork)
+    reweightedNetwork = network_utils.reweight_by_prob_in_rand_graph(ppiNetwork, diffExpDict)
     network_io.save_network(reweightedNetwork, 'weight', outDir + '/reweighted_network.txt')
 
     # Retain only edges between high scoring genes
@@ -282,7 +282,7 @@ def read_params(paramsFile):
     return params
     
 
-def run(execDir, nodeScoresFile, paramsFile):
+def run(execDir, nodeScoresFile, paramsFile, diffExpDict):
     outDir = execDir + '/output'
     if not os.path.isdir(outDir):
         raise ValueError('Output dir should be created manually: '+ outDir)
@@ -294,7 +294,7 @@ def run(execDir, nodeScoresFile, paramsFile):
         logFile.write('Starting find_clusters.py with parameters:' + os.linesep)
         logFile.write(str(params) + os.linesep)
         
-        clusters = perform_clustering(nodeScoresFile, outDir, logFile, **params)
+        clusters = perform_clustering(nodeScoresFile, outDir, logFile, diffExpDict, **params)
         
         clustering_viz.prepare_cluster_visualization( \
             clusters, outDir + '/reweighted_network.txt', outDir + '/clustering.na', \
