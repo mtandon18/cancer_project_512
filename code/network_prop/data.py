@@ -68,6 +68,6 @@ def differential_expression_dict(diffExpressionFile):
     diffExpDict = dict()  
     text = open(diffExpressionFile, 'r').read()
     for line in text[1:]:
-        splitLine = [l.strip() for l in line.split(",")]
+        splitLine = [l.strip().replace("\"", "") for l in line.split(",")]
         diffExpDict[splitLine[0]] = dissExpDict[float(splitLine[2])]
     return diffExpDict
