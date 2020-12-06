@@ -104,7 +104,7 @@ def find_max_cluster(nodeScores, network, logFile, outDir, minClusterNodes, maxC
     # Set optimization parameters
     m.setParam(GRB.Param.MIPGap, mipGap)
     m.setParam(GRB.Param.TimeLimit, timeLimit)
-    m.setParam(GRB.Param.Threads, 20)
+    m.setParam(GRB.Param.Threads, 16)
     #m.setParam(GRB.Param.MIPFocus, 3)
     
     '''
@@ -217,7 +217,7 @@ def perform_clustering(nodeScoresFile, outDir, logFile, diffExpDict, minPropagat
     network_io.save_network(reweightedNetwork, 'weight', outDir + '/reweighted_network.txt')
 
     # Retain only edges between high scoring genes
-    networkForClustering = reweightedNetwork.subgraph(list(nodeScores.keys()))
+    networkForClustering = reweightedNetwork.subgraph(list(nodeScores.keys())).copy()
     network_io.save_network(networkForClustering, 'weight', outDir + '/network_for_clustering.txt')
 
     clusters = []

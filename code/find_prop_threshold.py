@@ -35,7 +35,7 @@ def prior_size(priorFile, networkFile):
 def get_network_nodes(networkFile):
     # Return the nodes in the given network, excluding nodes whose only neighbors are themselves
     network = network_io.read_ppi(networkFile, removeSelfLoops=True)
-    networkNodes = [node for node in network.nodes() if len(network.neighbors(node)) > 0]
+    networkNodes = [node for node in network.nodes() if len(list(network.neighbors(node))) > 0]
     return networkNodes
 
 

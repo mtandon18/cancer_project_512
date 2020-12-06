@@ -9,7 +9,7 @@ def read_ppi(filename, removeSelfLoops=False):
             lineArr = line.strip().split('\t')
             ppiNetwork.add_edge(lineArr[0], lineArr[2], confidence=float(lineArr[1]))
     if removeSelfLoops:
-        ppiNetwork.remove_edges_from(ppiNetwork.selfloop_edges())
+        ppiNetwork.remove_edges_from(nx.selfloop_edges(ppiNetwork))
     return ppiNetwork
 
 
