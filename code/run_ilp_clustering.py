@@ -3,7 +3,7 @@ import re
 import sys
 import pandas as pd
 
-from network_prop import propagation
+from network_prop import propagation, data
 from clustering_ilp import find_clusters
 import find_prop_threshold as fpt
 
@@ -12,13 +12,14 @@ def run_framework(priorFile, paramsFile, execDir, diffExpressionFile, func=find_
     # Run propagation
     propFile = execDir + '/prop.txt' 
 
-    diffExpDict = propagation.run(priorFile, paramsFile, propFile, diffExpressionFile, expressionFile)
+    propagation.run(priorFile, paramsFile, propFile, expressionFile)
+    diffExpDict = data.differential_expression_dict(diffExpressionFile)
 
     if pvalue != None:
         # Get the actual size of the prior (i.e. exclude genes not in the ppi network) and run propagations over random priors of the same size
         params = propagation.read_params(paramsFile)
         priorSize = fpt.prior_size(priorFile, params['ppiFilename'])
-        fpt.generate_random_data(paramsFile, [priorSize], override=False)
+        fpt.generate_random_data(paramsFile, [priorSize], diffExpressionFile, override=False)
 
         # Get the pvalues for each gene
         pvaluesFile = execDir + '/ranking_by_pvalue.txt'
