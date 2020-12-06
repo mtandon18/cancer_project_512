@@ -7,9 +7,14 @@ BETA = 0.95
 def prob_modifier(logFChange, i, j):
     ilog = logFChange.get(i, None)
     jlog = logFChange.get(j, None)
-    if (ilog == None or jlog == None):
-        print ("Could not find gene in differential gene expression dictionary")
+    if ilog == None:
+        print (f"Could not find gene {i} in differential gene expression dictionary")
+    if jlog == None:
+        print (f"Could not find gene {j} in differential gene expression dictionary")
+
+    if ilog == None or jlog == None:
         return 1.0
+
     M = abs((ilog + jlog)/2.0)
     N = abs(ilog - jlog)
     return 1 - 2.0/math.pi*math.atan(M/3.0) + math.asinh(N/3.0)/2.0
